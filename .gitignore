@@ -1,1 +1,7 @@
 /Image/*
+/Lib/*
+/Scripts/*
+/.vscode/*
+/Share/*
+*.cfg
+*.pyc
