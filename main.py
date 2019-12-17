@@ -18,19 +18,19 @@ class Frame(wx.App):
  
         self.PhotoMaxSize = 640
  
-        self.createWidgets()
+        self.createwidgets()
         self.frame.Show()
  
-    def createWidgets(self):
+    def createwidgets(self):
         instructions = 'Browse for an image'
-        img = wx.Image(640,480)
+        img = wx.Image(640,640)
         self.imageCtrl = wx.StaticBitmap(self.panel, wx.ID_ANY, 
                                          wx.Bitmap(img))
  
         instructLbl = wx.StaticText(self.panel, label=instructions)
         self.photoTxt = wx.TextCtrl(self.panel, size=(200,-1))
         browseBtn = wx.Button(self.panel, label='Browse')
-        browseBtn.Bind(wx.EVT_BUTTON, self.onBrowse)
+        browseBtn.Bind(wx.EVT_BUTTON, self.on_browse)
  
         self.mainSizer = wx.BoxSizer(wx.VERTICAL)
         self.sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -48,7 +48,7 @@ class Frame(wx.App):
 
         self.panel.Layout()
 
-    def onBrowse(self, event):
+    def on_browse(self, event):
         """ 
         Browse for file
         """
@@ -58,11 +58,11 @@ class Frame(wx.App):
                                style=wx.FD_OPEN)
         if dialog.ShowModal() == wx.ID_OK:
             self.photoTxt.SetValue(dialog.GetPath())
-            self.onView()
+            self.on_view()
         dialog.Destroy()
 
-    def onView(self):
-        img = self.loadImage()
+    def on_view(self):
+        img = self.load_image()
         # scale the image, preserving the aspect ratio
         W = img.GetWidth()
         H = img.GetHeight()
@@ -70,19 +70,20 @@ class Frame(wx.App):
             NewW = self.PhotoMaxSize
             NewH = self.PhotoMaxSize * H / W
         else:
-            NewH = self.PhotoMaxSize
             NewW = self.PhotoMaxSize * W / H
+            NewH = self.PhotoMaxSize
         img = img.Scale(NewW,NewH)
 
         self.imageCtrl.SetBitmap(wx.Bitmap(img))
         self.panel.Refresh()
 
-    def loadImage(self):
+    def load_image(self):
         filepath = self.photoTxt.GetValue()
         image = io.imread(filepath)
         image = self.segmentation(image)
         height, width, nrgb = image.shape
         wximg = wx.ImageFromBuffer(width, height, image)
+        self.save_image(wx.Bitmap(wximg), '1.jpg')
         return wximg
 
     def segmentation(self, image_ndarray):
@@ -110,12 +111,15 @@ class Frame(wx.App):
         gray = cv2.cvtColor(image_ndarray, cv2.COLOR_BGR2GRAY)
         cv2.normalize(gray, gray, 0, 255, cv2.NORM_MINMAX)
         ret, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-        erode = cv2.erode(binary, None, iterations=30)
-        dilate = cv2.dilate(erode, None, iterations=30)
-        dilate = cv2.dilate(erode, None, iterations=50)
-        erode = cv2.erode(binary, None, iterations=50)
+        binary = cv2.erode(binary, None, iterations=20)
+        binary = cv2.dilate(binary, None, iterations=80)
+        binary = cv2.erode(binary, None, iterations=55)
         # binary = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,111,21)
-        result = cv2.cvtColor(dilate, cv2.COLOR_GRAY2RGB)
+        result = image_ndarray.copy()
+        result = cv2.bitwise_and(image_ndarray, image_ndarray, mask = binary)
+        # result = image_ndarray
+        # print(image_ndarray)
+        # result = cv2.cvtColor(image_ndarray, cv2.COLOR_GRAY2RGB)
 
         '''
         # Canny and find contour
@@ -128,6 +132,9 @@ class Frame(wx.App):
         '''
 
         return result
+
+    def save_image(self, image, filename):
+        image.SaveFile(filename, wx.BITMAP_TYPE_JPEG)
 
 if __name__ == '__main__':
     app = Frame()
