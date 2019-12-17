@@ -83,7 +83,8 @@ class Frame(wx.App):
         image = self.segmentation(image)
         height, width, nrgb = image.shape
         wximg = wx.ImageFromBuffer(width, height, image)
-        self.save_image(wx.Bitmap(wximg), '1.jpg')
+        save_filename = self.photoTxt.GetValue().split('\\')[-1]
+        self.save_image(wx.Bitmap(wximg), save_filename)
         return wximg
 
     def segmentation(self, image_ndarray):
@@ -116,7 +117,8 @@ class Frame(wx.App):
         binary = cv2.erode(binary, None, iterations=55)
         # binary = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,111,21)
         result = image_ndarray.copy()
-        result = cv2.bitwise_and(image_ndarray, image_ndarray, mask = binary)
+        masked = cv2.bitwise_and(image_ndarray, image_ndarray, mask=binary)
+        result = cv2.addWeighted(image_ndarray, 0.35, masked, 0.65, 0)
         # result = image_ndarray
         # print(image_ndarray)
         # result = cv2.cvtColor(image_ndarray, cv2.COLOR_GRAY2RGB)
