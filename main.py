@@ -12,6 +12,8 @@ import numpy as np
 class Frame(wx.App):
     def __init__(self, redirect=False, filename=None):
         wx.App.__init__(self, redirect, filename)
+        self.block_size = 10 # %
+        self.threshold = 30
         self.frame = wx.Frame(None, title='Photo Control')
  
         self.panel = wx.Panel(self.frame)
@@ -111,17 +113,40 @@ class Frame(wx.App):
         # Convert to Gray and threshold, erode and dilate
         gray = cv2.cvtColor(image_ndarray, cv2.COLOR_BGR2GRAY)
         cv2.normalize(gray, gray, 0, 255, cv2.NORM_MINMAX)
-        ret, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-        binary = cv2.erode(binary, None, iterations=20)
-        binary = cv2.dilate(binary, None, iterations=80)
-        binary = cv2.erode(binary, None, iterations=55)
+        ret, otsu_mask = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+        binary = cv2.erode(otsu_mask, None, iterations=45)
+        binary = cv2.dilate(binary, None, iterations=120)
+        binary = cv2.erode(binary, None, iterations=75)
         # binary = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,111,21)
         result = image_ndarray.copy()
         masked = cv2.bitwise_and(image_ndarray, image_ndarray, mask=binary)
         result = cv2.addWeighted(image_ndarray, 0.35, masked, 0.65, 0)
-        # result = image_ndarray
-        # print(image_ndarray)
-        # result = cv2.cvtColor(image_ndarray, cv2.COLOR_GRAY2RGB)
+
+        '''
+        hsv = cv2.cvtColor(image_ndarray, cv2.COLOR_BGR2HSV)
+        # print(hsv)
+        center_hue, center_saturation, center_value = self.get_center_color(image_ndarray)
+        gray = cv2.cvtColor(image_ndarray, cv2.COLOR_RGB2GRAY)
+        kernel_size = 3
+        gray = cv2.GaussianBlur(gray,(kernel_size, kernel_size), 0)
+        mask = cv2.Canny(gray, 30, 255)
+        # cv2.imshow('Edges', edges)
+        # print(f'Select Hue: {center_hue}')
+        '''
+
+        '''
+        row, col, channel = image_ndarray.shape
+        ret, otsu_mask = cv2.threshold(hsv[:,:,2], 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+        mask = np.zeros((row, col, 1), np.uint8)
+        '''
+        '''
+        for i in range(row):
+            for j in range(col):
+                if center_value-self.threshold < hsv[i,j,2] < center_value+self.threshold:
+                    mask[i,j] = 1
+        '''
+        # masked = cv2.bitwise_and(image_ndarray, image_ndarray, mask=mask)
+        # result = cv2.addWeighted(image_ndarray, 0.2, masked, 0.8, 0)
 
         '''
         # Canny and find contour
@@ -134,6 +159,24 @@ class Frame(wx.App):
         '''
 
         return result
+
+    def get_center_color(self, image_ndarray):
+        row, col, channel = image_ndarray.shape
+        width = int(min(row, col) * self.block_size / 100 / 2)
+        center_row = int(row/2)
+        center_col = int(col/2)
+        crop_image = image_ndarray[
+            center_row-width:center_row+width,
+            center_col-width:center_col+width,
+            :
+        ]
+        # cv2.imshow('crop_image', crop_image)
+        hsv = cv2.cvtColor(crop_image, cv2.COLOR_BGR2HSV)
+        hue = np.median(hsv[:, :, 0])
+        saturation = np.median(hsv[:,:,1])
+        value = np.median(hsv[:,:,2])
+        # print(hue,saturation,value)
+        return hue, saturation, value
 
     def save_image(self, image, filename):
         image.SaveFile(filename, wx.BITMAP_TYPE_JPEG)
