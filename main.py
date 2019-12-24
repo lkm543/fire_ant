@@ -110,6 +110,7 @@ class Frame(wx.App):
         result = cv2.addWeighted(image_ndarray, 0.3, seg_image, 0.7, 0)
         '''
 
+        '''
         # Convert to Gray and threshold, erode and dilate
         gray = cv2.cvtColor(image_ndarray, cv2.COLOR_BGR2GRAY)
         cv2.normalize(gray, gray, 0, 255, cv2.NORM_MINMAX)
@@ -121,6 +122,23 @@ class Frame(wx.App):
         result = image_ndarray.copy()
         masked = cv2.bitwise_and(image_ndarray, image_ndarray, mask=binary)
         result = cv2.addWeighted(image_ndarray, 0.35, masked, 0.65, 0)
+        '''
+
+        # find contours
+        gray = cv2.cvtColor(image_ndarray, cv2.COLOR_BGR2GRAY)
+        cv2.normalize(gray, gray, 0, 255, cv2.NORM_MINMAX)
+        ret, otsu_mask = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+        binary = cv2.erode(otsu_mask, None, iterations=30)
+        binary = cv2.dilate(binary, None, iterations=30)
+        (cnts,_) = cv2.findContours(binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        area = np.array([cv2.contourArea(cnts[i]) for i in range(len(cnts))])
+        maxa_ind = np.argmax(area)
+        hull = cv2.convexHull(cnts[maxa_ind], False)
+        result = image_ndarray.copy()
+
+        length = len(hull)
+        for i in range(len(hull)):
+            cv2.line(result, tuple(hull[i][0]), tuple(hull[(i+1)%length][0]), (0,255,0), 10)
 
         '''
         hsv = cv2.cvtColor(image_ndarray, cv2.COLOR_BGR2HSV)
