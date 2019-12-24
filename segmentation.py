@@ -12,17 +12,20 @@ class image_process():
         saved_filenames = []
         filenames = glob.glob(input_path + '/**', recursive=True)
         for filename in tqdm(filenames):
-            image = self.load_image(filename)
-            filename_without_path = filename.split('\\')[-1]
-            if os.path.isfile(filename):
-                # Check if the filename is used or not?
-                if filename_without_path not in saved_filenames:
-                    saved_filenames.append(filename_without_path)
+            if os.path.isfile(filename) and "HEIC" not in filename:
+                image = self.load_image(filename)
+                if image is not None:
+                    filename_without_path = filename.split('\\')[-1]
+                    # Check if the filename is used or not?
+                    if filename_without_path not in saved_filenames:
+                        saved_filenames.append(filename_without_path)
+                    else:
+                        print('Error!! Filename reused!!')
+                    output_filename = output_path + filename_without_path
+                    image = image_process.segmentation(image)
+                    cv2.imwrite(output_filename, image)
                 else:
-                    print('Error!! Filename reused!!')
-                output_filename = output_path + filename_without_path
-                image = image_process.segmentation(image)
-                cv2.imwrite(output_filename, image)
+                    print(f'Error in file: {filename}')
 
     def load_image(self, filename):
         img = cv2.imread(filename)
