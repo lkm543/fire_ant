@@ -1,8 +1,5 @@
-import os
 import wx
-import skimage.segmentation as seg
 from skimage import io
-import random
 import cv2
 import numpy as np
 
