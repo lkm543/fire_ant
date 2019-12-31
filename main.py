@@ -25,7 +25,9 @@ class Frame(wx.App):
     def createwidgets(self):
         instructions = 'Browse for an image'
         img = wx.Image(640,640)
-        self.imageCtrl = wx.StaticBitmap(self.panel, wx.ID_ANY, 
+        self.imageCtrl_l = wx.StaticBitmap(self.panel, wx.ID_ANY, 
+                                         wx.Bitmap(img))
+        self.imageCtrl_2 = wx.StaticBitmap(self.panel, wx.ID_ANY, 
                                          wx.Bitmap(img))
  
         instructLbl = wx.StaticText(self.panel, label=instructions)
@@ -33,13 +35,14 @@ class Frame(wx.App):
         browseBtn = wx.Button(self.panel, label='Browse')
         browseBtn.Bind(wx.EVT_BUTTON, self.on_browse)
  
-        self.mainSizer = wx.BoxSizer(wx.VERTICAL)
+        self.mainSizer = wx.BoxSizer(wx.HORIZONTAL)
         self.sizer = wx.BoxSizer(wx.HORIZONTAL)
 
         self.mainSizer.Add(wx.StaticLine(self.panel, wx.ID_ANY),
                            0, wx.ALL|wx.EXPAND, 5)
         self.mainSizer.Add(instructLbl, 0, wx.ALL, 5)
-        self.mainSizer.Add(self.imageCtrl, 0, wx.ALL, 5)
+        self.mainSizer.Add(self.imageCtrl_l, 0, wx.ALL, 5)
+        self.mainSizer.Add(self.imageCtrl_2, 0, wx.ALL, 5)
         self.sizer.Add(self.photoTxt, 0, wx.ALL, 5)
         self.sizer.Add(browseBtn, 0, wx.ALL, 5)        
         self.mainSizer.Add(self.sizer, 0, wx.ALL, 5)
@@ -59,11 +62,12 @@ class Frame(wx.App):
                                style=wx.FD_OPEN)
         if dialog.ShowModal() == wx.ID_OK:
             self.photoTxt.SetValue(dialog.GetPath())
-            self.on_view()
+            origin_img, processed_img = self.load_image()
+            self.on_view(self.imageCtrl_l, origin_img)
+            self.on_view(self.imageCtrl_2, processed_img)
         dialog.Destroy()
 
-    def on_view(self):
-        img = self.load_image()
+    def on_view(self, imageCtrl, img):
         # scale the image, preserving the aspect ratio
         W = img.GetWidth()
         H = img.GetHeight()
@@ -75,21 +79,20 @@ class Frame(wx.App):
             NewH = self.PhotoMaxSize
         img = img.Scale(NewW,NewH)
 
-        self.imageCtrl.SetBitmap(wx.Bitmap(img))
+        imageCtrl.SetBitmap(wx.Bitmap(img))
         self.panel.Refresh()
 
     def load_image(self):
         filepath = self.photoTxt.GetValue()
         image = io.imread(filepath)
-        print(type(image))
-        image = image_process.segmentation(image)
-        print(type(image))
         height, width, nrgb = image.shape
-        print(height, width, nrgb)
-        wximg = wx.Bitmap.FromBuffer(width, height, image)
+        origin_image = wx.ImageFromBuffer(width, height, image)
+        image = image_process.segmentation(image)
+        height, width, nrgb = image.shape
+        wximg = wx.ImageFromBuffer(width, height, np.array(image))
         save_filename = self.photoTxt.GetValue().split('\\')[-1]
         self.save_image(wx.Bitmap(wximg), save_filename)
-        return wximg
+        return origin_image, wximg
 
     def get_center_color(self, image_ndarray):
         row, col, channel = image_ndarray.shape
