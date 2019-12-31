@@ -44,7 +44,7 @@ class Frame(wx.App):
         self.mainSizer.Add(self.imageCtrl_l, 0, wx.ALL, 5)
         self.mainSizer.Add(self.imageCtrl_2, 0, wx.ALL, 5)
         self.sizer.Add(self.photoTxt, 0, wx.ALL, 5)
-        self.sizer.Add(browseBtn, 0, wx.ALL, 5)        
+        self.sizer.Add(browseBtn, 0, wx.ALL, 5)
         self.mainSizer.Add(self.sizer, 0, wx.ALL, 5)
  
         self.panel.SetSizer(self.mainSizer)
