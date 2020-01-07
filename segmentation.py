@@ -23,6 +23,7 @@ class image_process():
                         print('Error!! Filename reused!!')
                     output_filename = output_path + filename_without_path
                     image = image_process.segmentation(image)
+                    image = image_process.crop_image(image)
                     cv2.imwrite(output_filename, image)
                 else:
                     print(f'Error in file: {filename}')
@@ -46,22 +47,25 @@ class image_process():
         length = len(hull)
         # for i in range(len(hull)):
         #     cv2.line(result, tuple(hull[i][0]), tuple(hull[(i+1)%length][0]), (0,255,0), 10)
-        result = image_process.crop_image(result, hull)
+        result = image_process.extract_image(result, hull)
         return result
 
     @staticmethod
-    def crop_image(origin_image, contour):
+    def extract_image(origin_image, contour):
         x,y,w,h = cv2.boundingRect(contour)
         gray = cv2.cvtColor(origin_image, cv2.COLOR_BGR2GRAY)
         mask = np.zeros_like(gray)
         cv2.fillConvexPoly(mask, points=contour, color=(255))
         mask_out = np.zeros(origin_image.shape, np.uint8)
         mask_out[mask == 255] = origin_image[mask == 255]
-
-        # Crop image
-        x,y,w,h = cv2.boundingRect(contour)
-        mask_out = mask_out[y:y+h, x:x+w]
         return mask_out
+
+    @staticmethod
+    def crop_image(origin_image):
+        # Crop image
+        x,y,w,h = cv2.boundingRect(origin_image)
+        crop_out = origin_image[y:y+h, x:x+w]
+        return crop_out
 
 
 if __name__ == "__main__":

@@ -36,16 +36,16 @@ class Frame(wx.App):
         browseBtn.Bind(wx.EVT_BUTTON, self.on_browse)
  
         self.mainSizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.sizer = wx.BoxSizer(wx.VERTICAL)
 
         self.mainSizer.Add(wx.StaticLine(self.panel, wx.ID_ANY),
                            0, wx.ALL|wx.EXPAND, 5)
-        self.mainSizer.Add(instructLbl, 0, wx.ALL, 5)
-        self.mainSizer.Add(self.imageCtrl_l, 0, wx.ALL, 5)
-        self.mainSizer.Add(self.imageCtrl_2, 0, wx.ALL, 5)
+        self.sizer.Add(instructLbl, 0, wx.ALL, 5)
         self.sizer.Add(self.photoTxt, 0, wx.ALL, 5)
         self.sizer.Add(browseBtn, 0, wx.ALL, 5)
         self.mainSizer.Add(self.sizer, 0, wx.ALL, 5)
+        self.mainSizer.Add(self.imageCtrl_l, 0, wx.ALL, 5)
+        self.mainSizer.Add(self.imageCtrl_2, 0, wx.ALL, 5)
  
         self.panel.SetSizer(self.mainSizer)
         self.mainSizer.Fit(self.frame)
@@ -91,7 +91,7 @@ class Frame(wx.App):
         height, width, nrgb = image.shape
         wximg = wx.ImageFromBuffer(width, height, np.array(image))
         save_filename = self.photoTxt.GetValue().split('\\')[-1]
-        self.save_image(wx.Bitmap(wximg), save_filename)
+        # image.SaveFile(filename, wx.BITMAP_TYPE_JPEG)
         return origin_image, wximg
 
     def get_center_color(self, image_ndarray):
@@ -111,9 +111,6 @@ class Frame(wx.App):
         value = np.median(hsv[:,:,2])
         # print(hue,saturation,value)
         return hue, saturation, value
-
-    def save_image(self, image, filename):
-        image.SaveFile(filename, wx.BITMAP_TYPE_JPEG)
 
 if __name__ == '__main__':
     app = Frame()
