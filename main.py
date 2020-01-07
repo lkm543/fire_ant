@@ -53,9 +53,6 @@ class Frame(wx.App):
         self.panel.Layout()
 
     def on_browse(self, event):
-        """ 
-        Browse for file
-        """
         wildcard = "JPEG files (*.jpg)|*.JPG"
         dialog = wx.FileDialog(None, "Choose a file",
                                wildcard=wildcard,
@@ -90,7 +87,7 @@ class Frame(wx.App):
         image = image_process.segmentation(image)
         height, width, nrgb = image.shape
         wximg = wx.ImageFromBuffer(width, height, np.array(image))
-        save_filename = self.photoTxt.GetValue().split('\\')[-1]
+        # save_filename = self.photoTxt.GetValue().split('\\')[-1]
         # image.SaveFile(filename, wx.BITMAP_TYPE_JPEG)
         return origin_image, wximg
 
@@ -104,13 +101,12 @@ class Frame(wx.App):
             center_col-width:center_col+width,
             :
         ]
-        # cv2.imshow('crop_image', crop_image)
         hsv = cv2.cvtColor(crop_image, cv2.COLOR_BGR2HSV)
         hue = np.median(hsv[:, :, 0])
-        saturation = np.median(hsv[:,:,1])
-        value = np.median(hsv[:,:,2])
-        # print(hue,saturation,value)
+        saturation = np.median(hsv[:, :, 1])
+        value = np.median(hsv[:, :, 2])
         return hue, saturation, value
+
 
 if __name__ == '__main__':
     app = Frame()
