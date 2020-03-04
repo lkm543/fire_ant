@@ -17,17 +17,19 @@ class Frame(wx.App):
  
         self.panel = wx.Panel(self.frame)
  
-        self.PhotoMaxSize = 640
+        self.PhotoMaxSize = 480
  
         self.createwidgets()
         self.frame.Show()
  
     def createwidgets(self):
         instructions = 'Browse for an image'
-        img = wx.Image(640,640)
+        img = wx.Image(self.PhotoMaxSize, self.PhotoMaxSize)
         self.imageCtrl_l = wx.StaticBitmap(self.panel, wx.ID_ANY, 
                                          wx.Bitmap(img))
         self.imageCtrl_2 = wx.StaticBitmap(self.panel, wx.ID_ANY, 
+                                         wx.Bitmap(img))
+        self.imageCtrl_3 = wx.StaticBitmap(self.panel, wx.ID_ANY, 
                                          wx.Bitmap(img))
  
         instructLbl = wx.StaticText(self.panel, label=instructions)
@@ -46,6 +48,7 @@ class Frame(wx.App):
         self.mainSizer.Add(self.sizer, 0, wx.ALL, 5)
         self.mainSizer.Add(self.imageCtrl_l, 0, wx.ALL, 5)
         self.mainSizer.Add(self.imageCtrl_2, 0, wx.ALL, 5)
+        self.mainSizer.Add(self.imageCtrl_3, 0, wx.ALL, 5)
  
         self.panel.SetSizer(self.mainSizer)
         self.mainSizer.Fit(self.frame)
@@ -59,9 +62,10 @@ class Frame(wx.App):
                                style=wx.FD_OPEN)
         if dialog.ShowModal() == wx.ID_OK:
             self.photoTxt.SetValue(dialog.GetPath())
-            origin_img, processed_img = self.load_image()
+            origin_img, processed_img, processed_img_2 = self.load_image()
             self.on_view(self.imageCtrl_l, origin_img)
             self.on_view(self.imageCtrl_2, processed_img)
+            self.on_view(self.imageCtrl_3, processed_img_2)
         dialog.Destroy()
 
     def on_view(self, imageCtrl, img):
@@ -87,9 +91,13 @@ class Frame(wx.App):
         image = image_process.segmentation(image)
         height, width, nrgb = image.shape
         wximg = wx.ImageFromBuffer(width, height, np.array(image))
+
+        image_level_Set = image_process.segmentation_level_Set(image)
+        height, width, nrgb = image_level_Set.shape
+        wximg_level_Set = wx.ImageFromBuffer(width, height, np.array(image_level_Set))
         # save_filename = self.photoTxt.GetValue().split('\\')[-1]
         # image.SaveFile(filename, wx.BITMAP_TYPE_JPEG)
-        return origin_image, wximg
+        return origin_image, wximg, wximg_level_Set
 
     def get_center_color(self, image_ndarray):
         row, col, channel = image_ndarray.shape

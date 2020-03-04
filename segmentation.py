@@ -3,6 +3,7 @@ import os
 
 import cv2
 import numpy as np
+import scipy.ndimage
 
 from tqdm import tqdm
 
@@ -48,6 +49,37 @@ class image_process():
         # for i in range(len(hull)):
         #     cv2.line(result, tuple(hull[i][0]), tuple(hull[(i+1)%length][0]), (0,255,0), 10)
         result = image_process.extract_image(result, hull)
+        return result
+
+    @staticmethod
+    def segmentation_level_Set(image_ndarray):
+        dt = 1
+        it = 10
+        sigma = 20
+        gray = cv2.cvtColor(image_ndarray, cv2.COLOR_BGR2GRAY)
+        img_smooth = scipy.ndimage.filters.gaussian_filter(gray, sigma)
+
+        dphi_x, dphi_y = np.gradient(img_smooth)
+        dphi_pow = np.square(dphi_x) + np.square(dphi_y)
+        Force = 1. / (1. + dphi_pow)
+
+        for i in range(it):
+            print(i)
+            dphi_x, dphi_y = np.gradient(img_smooth)
+            dphi = np.square(dphi_x) + np.square(dphi_y)
+            dphi_norm = np.sqrt(dphi)
+            Force = 1. / (1. + dphi)
+
+            img_smooth = img_smooth + dt * Force * dphi_norm
+
+        img_show = img_smooth.copy()
+        img_show = np.uint8(img_show)
+        ret, img_show = cv2.threshold(img_show, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+        (cnts,_) = cv2.findContours(img_show, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        area = np.array([cv2.contourArea(cnts[i]) for i in range(len(cnts))])
+        maxa_ind = np.argmax(area)
+        result = image_ndarray.copy()    
+        result = image_process.extract_image(result, cnts[maxa_ind])
         return result
 
     @staticmethod
