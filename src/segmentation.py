@@ -54,7 +54,7 @@ class image_process():
     @staticmethod
     def segmentation_level_Set(image_ndarray):
         dt = 1
-        it = 10
+        it = 3
         sigma = 20
         gray = cv2.cvtColor(image_ndarray, cv2.COLOR_BGR2GRAY)
         img_smooth = scipy.ndimage.filters.gaussian_filter(gray, sigma)

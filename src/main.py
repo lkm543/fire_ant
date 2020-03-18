@@ -100,9 +100,9 @@ class Frame(wx.App):
             wildcard="Image (*.jpg)|*.jpg",
             style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT
         ) as fileDialog:
-
+            # User changes their mind
             if fileDialog.ShowModal() == wx.ID_CANCEL:
-                return False    # the user changed their mind
+                return False
 
             # save the current contents in the file
             pathName = fileDialog.GetPath()
