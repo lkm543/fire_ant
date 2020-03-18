@@ -4,6 +4,8 @@
 
 This method try to extract potato chips from image by traditional image processing method.
 
+![GUI](/img/method_1.jpg)
+
 ### Steps
 
 1. Convert to gray
@@ -16,9 +18,15 @@ This method try to extract potato chips from image by traditional image processi
 8. Extract the area inside the polygon.
 9. Crop the polygon out.
 
-### Run
+### Usage
+
+#### GUI
 
     python src/main.py
+
+#### Process all images in Image directory
+
+    python src/segmentation.py
 
 ### Result
 
@@ -28,11 +36,19 @@ This method try to extract potato chips from image by traditional image processi
 
 ### Conclusion
 
+-   Advantage
 
+    - Simple
+    - Fast
+
+-   Shortage
+
+    - Unable to handle the cracked chips
+    - Performance is bad once the photo was not taken properly.
 
 ## Level Set Method
 
-([Ref](https://wiseodd.github.io/techblog/2016/11/20/levelset-segmentation/))
+Try to extract potato chips by level set method.([Ref](https://wiseodd.github.io/techblog/2016/11/20/levelset-segmentation/))
 
 ### Steps
 
@@ -47,7 +63,8 @@ This method try to extract potato chips from image by traditional image processi
 
 ### Conclusion
 
-Very very slow....
+- Shortage
+    - Very very slow....
 
 ## Convex Shape Prior for Multi-Object Segmentation Using a Single Level
 
