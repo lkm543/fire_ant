@@ -40,9 +40,10 @@ This method try to extract potato chips from image by traditional image processi
 
 ### Result
 
-![Alt text](/path/to/img.jpg)
+![Alt text](/img/method_2_img_1.jpg)
 
-![Alt text](/path/to/img.jpg)
+![Alt text](/img/method_2_img_2.jpg)
+
 
 ### Conclusion
 
@@ -50,7 +51,7 @@ Very very slow....
 
 ## Convex Shape Prior for Multi-Object Segmentation Using a Single Level
 
-Try to reproduce the result([Ref](http://openaccess.thecvf.com/content_ICCV_2019/papers/Luo_Convex_Shape_Prior_for_Multi-Object_Segmentation_Using_a_Single_Level_ICCV_2019_paper.pdf)), but failed.I sent an email to the first author to ask for help, but receiving no reply.
+Try to reproduce the result([Ref](http://openaccess.thecvf.com/content_ICCV_2019/papers/Luo_Convex_Shape_Prior_for_Multi-Object_Segmentation_Using_a_Single_Level_ICCV_2019_paper.pdf)), but failed. I sent an email to the first author asking for help, but receiving no reply.
 
 ## Experiment
 
