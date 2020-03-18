@@ -4,7 +4,7 @@
 
 This method try to extract potato chips from image by traditional image processing method.
 
-![GUI](/img/method_1.jpg)
+![GUI](/img/method_1.JPG)
 
 ### Steps
 
